@@ -17,6 +17,8 @@
       environment.systemPackages =
         [ pkgs.vim
           pkgs.emacs
+          pkgs.ihp-new
+          pkgs.direnv
         ];
 
       environment.variables = {
