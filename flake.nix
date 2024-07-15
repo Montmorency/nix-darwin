@@ -2,8 +2,9 @@
   description = "Montmorency Darwin System Flake";
 
   inputs = {
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-24.05-darwin";
+    #nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    #nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-24.05-darwin";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-23.11-darwin";
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -15,10 +16,15 @@
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
       environment.systemPackages =
-        [ pkgs.vim
-          pkgs.emacs
-          pkgs.ihp-new
-          pkgs.direnv
+        with pkgs; 
+        [ vim
+          emacs
+          ihp-new
+          direnv
+          clang
+          clangStdenv
+          libiconv
+          glib
         ];
 
       environment.variables = {
