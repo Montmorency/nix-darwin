@@ -10,8 +10,9 @@
     perSystem = {self', config, pkgs, ...} : {
       packages.hello = pkgs.writeShellScriptBin "hello" ''
         echo "Hello, world!";
-        ''; # (import hello.nix) {writeShellScriptBin = nixpkgs.pkgs.writeShellScriptBin;};
-      packages.default = self'.packages.hello;
+        ''; 
+      packages.importHello = (import ./hello.nix) {writeShellScriptBin = pkgs.writeShellScriptBin;};
+      packages.default = self'.packages.importHello;
     }; 
   };
 }
