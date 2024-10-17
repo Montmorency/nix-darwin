@@ -25,6 +25,7 @@
           clangStdenv
           libiconv
           glib
+          gnumeric
         ];
 
       environment.variables = {
@@ -54,16 +55,28 @@
       system.stateVersion = 4;
 
       # The platform the configuration will be used on.
+      # https://github.com/LnL7/nix-darwin/pull/974 (issue for over riding host platform on builder)
+      # https://github.com/NixOS/nixpkgs/blob/nixos-24.05/nixos/modules/profiles/macos-builder.nix
       nixpkgs.hostPlatform = "x86_64-darwin";
-
-      launchd.daemons.linux-builder = { serviceConfig = { StandardOutPath = "/var/log/darwin-builder.log"; StandardErrorPath = "/var/log/darwin-builder.log"; }; };
-      nix.linux-builder.enable = true;
-      nix.linux-builder.ephemeral = false;
-      nix.linux-builder.config = { 
-       nix.settings.sandbox = false; 
-       services.openssh.enable = true;
+      #
+      launchd.daemons.linux-builder = { 
+        serviceConfig = { StandardOutPath = "/var/log/darwin-builder.log"; 
+        StandardErrorPath = "/var/log/darwin-builder.log"; }; 
       };
-      nix.linux-builder.maxJobs = 4;
+      
+       nix.linux-builder.enable = true;
+       nix.linux-builder.package = pkgs.darwin.linux-builder-x86_64;
+       nix.linux-builder.ephemeral = true;
+       nix.linux-builder.maxJobs = 4;
+       nix.linux-builder.config = { 
+          virtualisation.darwin-builder = {
+            diskSize = 60 * 1024;
+            memorySize = 8 * 1024;
+          };
+          nix.settings.sandbox = false; 
+          services.openssh.enable = true;
+          nixpkgs.hostPlatform = "x86_64-linux";
+      };
     };
   in
   {

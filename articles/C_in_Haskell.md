@@ -86,5 +86,42 @@ Well if we examine contents of hackage packages lets pick one:
 ```
 
 
+Now in my situation the app I was building because my with-utf8 dependency was failing to build.
+On the x86_64 darwin system I was using it could not find a headerfile `libcharset.h` when buildding the 
+utf8-troubleshoot package. 
 
-callPackage 
+Patching the hackage  package definition with librarySystemDepends [libiconv] 
+solves the issue: ThelibrarySystemDepends 
+
+```
+  "with-utf8_1_1_0_0" = callPackage
+    ({ mkDerivation, base, deepseq, directory, filepath, hedgehog
+     , HUnit, process, safe-exceptions, libiconv, tasty, tasty-discover
+     , tasty-hedgehog, tasty-hunit, temporary, text, th-env, unix
+     }:
+     mkDerivation {
+       pname = "with-utf8";
+       version = "1.1.0.0";
+       sha256 = "01p1pxshm3kjawy6sx8j1jw0sqg5dwbp2cy6wd04qmccr3vx1f54";
+       isLibrary = true;
+       isExecutable = true;
+       libraryHaskellDepends = [ base safe-exceptions text ];
+       librarySystemDepends = [ libiconv ];
+       executableHaskellDepends = [
+         base directory filepath process safe-exceptions text th-env
+       ];
+       testHaskellDepends = [
+         base deepseq hedgehog HUnit safe-exceptions tasty tasty-hedgehog
+         tasty-hunit temporary text unix
+       ];
+       testToolDepends = [ tasty-discover ];
+       description = "Get your IO right on the first try";
+       license = lib.licenses.mpl20;
+       hydraPlatforms = lib.platforms.none;
+       mainProgram = "utf8-troubleshoot";
+     }) {inherit (pkgs) libiconv; };
+```
+
+[`callPackage`](https://github.com/NixOS/nixpkgs/blob/fe138d36c9a23de3490a3bfa2f9dda8bf56427b9/lib/customisation.nix)
+
+[Call Package A Tool For the Lazy]
