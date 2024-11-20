@@ -2,14 +2,14 @@
   description = "Montmorency Darwin System Flake";
 
   inputs = {
-    #nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     #nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-24.05-darwin";
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-23.11-darwin";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  #  determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs,  ... }:
   # options:
   let
     configuration = { pkgs, ... }: {
@@ -18,14 +18,12 @@
       environment.systemPackages =
         with pkgs; 
         [ vim
+          devenv
           emacs
           ihp-new
           direnv
-          clang
-          clangStdenv
-          libiconv
-          glib
-          gnumeric
+          nixos-rebuild
+          cachix
         ];
 
       environment.variables = {
@@ -38,9 +36,9 @@
 
       # Necessary for using flakes on this system.
       nix.settings.experimental-features = "nix-command flakes";
-      nix.settings.trusted-users = ["root" "lambert" "admin"];   
+      nix.settings.trusted-users = ["root" "lambert" "admin" ];   
       nix.settings.extra-trusted-users = ["root" "lambert" "admin"];   
-      nix.settings.trusted-substituters = ["https://cache.nixos.org" "https://cache.nixos.org/" "https://montmorency-packages.cachix.org" "https://digitallyinduced.cachix.org"];
+      nix.settings.trusted-substituters = ["https://cache.nixos.org/" "https://montmorency-packages.cachix.org" "https://digitallyinduced.cachix.org"];
   
 
       # Create /etc/zshrc that loads the nix-darwin environment.
@@ -74,8 +72,14 @@
             memorySize = 8 * 1024;
           };
           nix.settings.sandbox = false; 
+          nix.settings.trusted-substituters = ["https://cache.nixos.org" "https://cache.nixos.org/" "https://montmorency-packages.cachix.org" "https://digitallyinduced.cachix.org"];
           services.openssh.enable = true;
           nixpkgs.hostPlatform = "x86_64-linux";
+          environment.etc."ssh/ssh_config.d/target_machine_alias.conf".text = ''
+    Host ihp-machine-root
+    HostName 0.0.0.0
+    User root
+  '';
       };
     };
   in
@@ -83,7 +87,10 @@
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#simple
     darwinConfigurations."Enrico" = nix-darwin.lib.darwinSystem {
-      modules = [ configuration ];
+      modules = [ 
+        #determinate.darwinModules.default
+        configuration 
+    ];
     };
 
     # Expose the package set, including overlays, for convenience.
