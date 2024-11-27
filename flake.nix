@@ -2,9 +2,7 @@
   description = "Montmorency Darwin System Flake";
 
   inputs = {
-    #nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-24.05-darwin";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-  #  determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -62,21 +60,25 @@
         StandardErrorPath = "/var/log/darwin-builder.log"; }; 
       };
       
+       #https://github.com/LnL7/nix-darwin/blob/6ab87b7c84d4ee873e937108c4ff80c015a40c7a/modules/nix/linux-builder.nix
        nix.linux-builder.enable = true;
        nix.linux-builder.package = pkgs.darwin.linux-builder-x86_64;
-       nix.linux-builder.ephemeral = true;
        nix.linux-builder.maxJobs = 4;
+       nix.linux-builder.ephemeral= true;
+       nix.linux-builder.workingDirectory="/var/lib/darwin-builder"; 
        nix.linux-builder.config = { 
           virtualisation.darwin-builder = {
             diskSize = 60 * 1024;
-            memorySize = 8 * 1024;
+            memorySize = 16 * 1024;
           };
-          nix.settings.sandbox = false; 
+          nix.settings.trusted-users = ["root" "lambert" "admin" ];   
+          # nix.settings.sandbox = false; 
           nix.settings.trusted-substituters = ["https://cache.nixos.org" "https://cache.nixos.org/" "https://montmorency-packages.cachix.org" "https://digitallyinduced.cachix.org"];
           services.openssh.enable = true;
           nixpkgs.hostPlatform = "x86_64-linux";
+          environment.systemPackages = [ pkgs.neovim ];
           environment.etc."ssh/ssh_config.d/target_machine_alias.conf".text = ''
-    Host ihp-machine-root
+    Host ihp-machine
     HostName 0.0.0.0
     User root
   '';
