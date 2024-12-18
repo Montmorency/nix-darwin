@@ -30,6 +30,7 @@
 
       # Auto upgrade nix package and the daemon service.
       services.nix-daemon.enable = true;
+
       # nix.package = pkgs.nix;
 
       # Necessary for using flakes on this system.
@@ -41,7 +42,7 @@
 
       # Create /etc/zshrc that loads the nix-darwin environment.
       programs.zsh.enable = true;  # default shell on catalina
-      # programs.fish.enable = true;
+      programs.direnv.enable = true;
 
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
@@ -62,26 +63,20 @@
       
        #https://github.com/LnL7/nix-darwin/blob/6ab87b7c84d4ee873e937108c4ff80c015a40c7a/modules/nix/linux-builder.nix
        nix.linux-builder.enable = true;
+       nix.linux-builder.ephemeral= true;
        nix.linux-builder.package = pkgs.darwin.linux-builder-x86_64;
        nix.linux-builder.maxJobs = 4;
-       nix.linux-builder.ephemeral= true;
        nix.linux-builder.workingDirectory="/var/lib/darwin-builder"; 
        nix.linux-builder.config = { 
           virtualisation.darwin-builder = {
-            diskSize = 60 * 1024;
+            diskSize = 120 * 1024;
             memorySize = 16 * 1024;
           };
           nix.settings.trusted-users = ["root" "lambert" "admin" ];   
-          # nix.settings.sandbox = false; 
           nix.settings.trusted-substituters = ["https://cache.nixos.org" "https://cache.nixos.org/" "https://montmorency-packages.cachix.org" "https://digitallyinduced.cachix.org"];
           services.openssh.enable = true;
           nixpkgs.hostPlatform = "x86_64-linux";
           environment.systemPackages = [ pkgs.neovim ];
-          environment.etc."ssh/ssh_config.d/target_machine_alias.conf".text = ''
-    Host ihp-machine
-    HostName 0.0.0.0
-    User root
-  '';
       };
     };
   in
@@ -90,7 +85,6 @@
     # $ darwin-rebuild build --flake .#simple
     darwinConfigurations."Enrico" = nix-darwin.lib.darwinSystem {
       modules = [ 
-        #determinate.darwinModules.default
         configuration 
     ];
     };
