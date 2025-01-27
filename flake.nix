@@ -18,10 +18,14 @@
         [ vim
           devenv
           emacs
+#          texliveSmall
           ihp-new
           direnv
           nixos-rebuild
           cachix
+          git
+          lsof
+          nix-tree
         ];
 
       environment.variables = {
@@ -65,18 +69,19 @@
        nix.linux-builder.enable = true;
        nix.linux-builder.ephemeral= true;
        nix.linux-builder.package = pkgs.darwin.linux-builder-x86_64;
-       nix.linux-builder.maxJobs = 4;
+       #nix.linux-builder.maxJobs = 4;
        nix.linux-builder.workingDirectory="/var/lib/darwin-builder"; 
        nix.linux-builder.config = { 
+          virtualisation.cores = 4;
           virtualisation.darwin-builder = {
-            diskSize = 120 * 1024;
+            diskSize = 80 * 1024;
             memorySize = 16 * 1024;
           };
           nix.settings.trusted-users = ["root" "lambert" "admin" ];   
           nix.settings.trusted-substituters = ["https://cache.nixos.org" "https://cache.nixos.org/" "https://montmorency-packages.cachix.org" "https://digitallyinduced.cachix.org"];
           services.openssh.enable = true;
           nixpkgs.hostPlatform = "x86_64-linux";
-          environment.systemPackages = [ pkgs.neovim ];
+          environment.systemPackages = [ pkgs.vim ];
       };
     };
   in
