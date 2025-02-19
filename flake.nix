@@ -8,8 +8,8 @@
   };
 
   outputs = inputs@{ self, nix-darwin, nixpkgs,  ... }:
-  # options:
   let
+    linuxPkgs = import nixpkgs { system = "x86_64-linux"; };
     configuration = { pkgs, ... }: {
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
@@ -18,7 +18,6 @@
         [ vim
           devenv
           emacs
-#          texliveSmall
           ihp-new
           direnv
           nixos-rebuild
@@ -26,16 +25,17 @@
           git
           lsof
           nix-tree
+          djvulibre
+          djvu2pdf
+          texlive
+          typst
         ];
-
       environment.variables = {
                                  EDITOR = "vim";
                               };    
 
       # Auto upgrade nix package and the daemon service.
-      services.nix-daemon.enable = true;
-
-      # nix.package = pkgs.nix;
+      # services.nix-daemon.enable = true;
 
       # Necessary for using flakes on this system.
       nix.settings.experimental-features = "nix-command flakes";
@@ -53,7 +53,7 @@
 
       # Used for backwards compatibility, please read the changelog before changing.
       # $ darwin-rebuild changelog
-      system.stateVersion = 4;
+      system.stateVersion = 5;
 
       # The platform the configuration will be used on.
       # https://github.com/LnL7/nix-darwin/pull/974 (issue for over riding host platform on builder)
@@ -69,19 +69,22 @@
        nix.linux-builder.enable = true;
        nix.linux-builder.ephemeral= true;
        nix.linux-builder.package = pkgs.darwin.linux-builder-x86_64;
-       #nix.linux-builder.maxJobs = 4;
+       nix.linux-builder.maxJobs = 4;
        nix.linux-builder.workingDirectory="/var/lib/darwin-builder"; 
        nix.linux-builder.config = { 
           virtualisation.cores = 4;
           virtualisation.darwin-builder = {
-            diskSize = 80 * 1024;
-            memorySize = 16 * 1024;
+            diskSize = 65 * 1024;
+            memorySize = 12 * 1024;
           };
           nix.settings.trusted-users = ["root" "lambert" "admin" ];   
           nix.settings.trusted-substituters = ["https://cache.nixos.org" "https://cache.nixos.org/" "https://montmorency-packages.cachix.org" "https://digitallyinduced.cachix.org"];
           services.openssh.enable = true;
           nixpkgs.hostPlatform = "x86_64-linux";
-          environment.systemPackages = [ pkgs.vim ];
+          environment.systemPackages = with linuxPkgs; [  
+            cachix 
+            vim
+          ];
       };
     };
   in
