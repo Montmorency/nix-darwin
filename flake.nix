@@ -11,9 +11,19 @@
   let
     linuxPkgs = import nixpkgs { system = "x86_64-linux"; };
     configuration = { pkgs, ... }: {
+
+
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
-      environment.systemPackages =
+      environment.systemPackages = let
+          tex = (pkgs.texlive.combine {
+                  inherit (pkgs.texlive) scheme-basic metafont
+                                         dvisvgm dvipng # for preview and export as html
+                                         wrapfig amsmath ulem hyperref capt-of;
+                                         #(setq org-latex-compiler "lualatex")
+                                         #(setq org-preview-latex-default-process 'dvisvgm)
+                }); #https://nixos.wiki/wiki/TexLive
+        in
         with pkgs; 
         [ vim
           devenv
@@ -27,7 +37,7 @@
           nix-tree
           djvulibre
           djvu2pdf
-#          texlive
+          tex
           typst
         ];
       environment.variables = {
@@ -67,7 +77,7 @@
       
        #https://github.com/LnL7/nix-darwin/blob/6ab87b7c84d4ee873e937108c4ff80c015a40c7a/modules/nix/linux-builder.nix
        nix.linux-builder.enable = true;
-       nix.linux-builder.ephemeral= true;
+       nix.linux-builder.ephemeral=  false;
        nix.linux-builder.package = pkgs.darwin.linux-builder-x86_64;
        nix.linux-builder.maxJobs = 4;
        nix.linux-builder.workingDirectory="/var/lib/darwin-builder"; 
