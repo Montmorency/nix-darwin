@@ -27,7 +27,7 @@
           nix-tree
           djvulibre
           djvu2pdf
-          texlive
+#          texlive
           typst
         ];
       environment.variables = {
