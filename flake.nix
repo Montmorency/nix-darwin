@@ -17,11 +17,9 @@
       # $ nix-env -qaP | grep wget
       environment.systemPackages = let
           tex = (pkgs.texlive.combine {
-                  inherit (pkgs.texlive) scheme-basic metafont
-                                         dvisvgm dvipng # for preview and export as html
-                                         wrapfig amsmath ulem hyperref capt-of;
-                                         #(setq org-latex-compiler "lualatex")
-                                         #(setq org-preview-latex-default-process 'dvisvgm)
+                  inherit (pkgs.texlive) scheme-basic metafont tufte-latex etbb xkeyval hardwrap titlesec catchfile
+                                         xcolor setspace dvisvgm dvipng etoolbox ragged2e units natbib microtype bidi xypic
+                                         helvetic mathpazo wrapfig textcase amsmath ulem hyperref capt-of booktabs;
                 }); #https://nixos.wiki/wiki/TexLive
         in
         with pkgs; 
